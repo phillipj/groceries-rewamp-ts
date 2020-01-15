@@ -118,16 +118,18 @@ const App: React.FC = () => {
           )}
         />
       </form>
-      <List>
-        {groceries.map(grocery => {
-          return <ListItem key={grocery.text} button onClick={() => dispatch({ type: 'toggle', text: grocery.text })}>
-            <ListItemIcon>
-              <Checkbox checked={grocery.isCompleted} disableRipple />
-            </ListItemIcon>
-            <ListItemText primary={grocery.text} />
-          </ListItem>
-        })}
-      </List>
+      <main>
+        <List>
+          {groceries.map(grocery =>
+            <ListItem key={grocery.text} button onClick={() => dispatch({ type: 'toggle', text: grocery.text })} data-testid="grocery">
+              <ListItemIcon>
+                <Checkbox checked={grocery.isCompleted} disableRipple />
+              </ListItemIcon>
+              <ListItemText primary={grocery.text} />
+            </ListItem>
+          )}
+        </List>
+      </main>
     </div>
   );
 }
