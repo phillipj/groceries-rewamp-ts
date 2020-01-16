@@ -20,9 +20,11 @@ type State = {
 
 type Action =
   | { type: 'toggle', text: string }
-  | { type: 'add', text: string };
+  | { type: 'add', text: string }
+  | { type: 'sort-completed-below-uncompleted' }
 
 const localStorageKey = 'groceries'
+const second = 1000
 
 function getStateFromLocalStorage(): State {
   let groceries = [] as Array<Grocery>
@@ -66,6 +68,10 @@ const App: React.FC = () => {
         const oldGrocery = state.groceries.find(grocery => grocery.text.toLowerCase() === action.text.toLowerCase())
         const oldCompletedStatus = oldGrocery?.isCompleted ?? false
 
+        setTimeout(() => {
+          dispatch({ type: 'sort-completed-below-uncompleted' })
+        }, 2 * second)
+
         return {
           groceries: state.groceries.map(grocery => {
             const isGroceryToToggle = grocery === oldGrocery
@@ -73,6 +79,16 @@ const App: React.FC = () => {
             return isGroceryToToggle ? { ...grocery, isCompleted: !oldCompletedStatus } : grocery;
           })
         }
+
+      case 'sort-completed-below-uncompleted':
+        const uncompleted = state.groceries.filter(g => !g.isCompleted)
+        const completed = state.groceries.filter(g => g.isCompleted)
+
+        return {
+          ...state,
+          groceries: [ ...uncompleted, ...completed ]
+        }
+
       default:
         return state;
     }

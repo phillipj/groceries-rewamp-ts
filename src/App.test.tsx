@@ -1,6 +1,8 @@
 import React from 'react'
-import { fireEvent, render } from '@testing-library/react'
+import { act, fireEvent, render } from '@testing-library/react'
 import App from './App'
+
+jest.useFakeTimers();
 
 function submitGrocery(groceryText: string, labelToClick: Element) {
   fireEvent.click(labelToClick)
@@ -45,4 +47,25 @@ test('latest grocery added is rendered first in the list', () => {
 
   const groceries = getAllByTestId('grocery').map(grocery => grocery.textContent)
   expect(groceries).toEqual(['Brokkoli', 'Gulrot'])
+})
+
+test('clicking a grocery to mark it as complete moves the grocery below all uncompleted groceries after a while', () => {
+  const { getAllByTestId, getByLabelText } = render(<App />)
+
+  submitGrocery('Gulrot', getByLabelText('Ny matvare..'))
+  submitGrocery('Brokkoli ', getByLabelText('Ny matvare..'))
+
+  const firstGrocery = getAllByTestId('grocery')[0]
+
+  fireEvent.click(firstGrocery)
+
+  // act() is needed whenever code gets executed that causes state changes, probably only if
+  // we're not using testing-library functions, since those functions should know for themselfs
+  // when state changes might occur
+  act(() => {
+    jest.runAllTimers()
+  })
+
+  const groceries = getAllByTestId('grocery').map(grocery => grocery.textContent)
+  expect(groceries).toEqual(['Gulrot', 'Brokkoli'])
 })
