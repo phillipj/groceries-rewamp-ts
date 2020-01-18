@@ -22,7 +22,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "deploy": "npm run build && aws s3 sync --profile=personal --region=eu-central-1 --acl=public-read --delete build/ s3://handlelista.lightweight.no"
   },
   "eslintConfig": {
     "extends": "react-app"
