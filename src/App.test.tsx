@@ -75,13 +75,9 @@ describe('sorting', () => {
 })
 
 describe('deleting groceries', () => {
-  test('long pressing a grocery should make delete button appear after a while', () => {
-    const { getByTestId, getByLabelText } = render(<App initialState={{ groceries: [] }} />)
 
-    submitGrocery('Gulrot', getByLabelText('Ny matvare..'))
-
-    const groceryElement = getByTestId('grocery')
-    fireEvent.mouseDown(groceryElement)
+  function longPress(element: HTMLElement) {
+    fireEvent.mouseDown(element)
 
     // act() is needed whenever code gets executed that causes state changes, probably only if
     // we're not using testing-library functions, since those functions should know for themselfs
@@ -89,6 +85,13 @@ describe('deleting groceries', () => {
     act(() => {
       jest.runAllTimers()
     })
+  }
+
+  test('long pressing a grocery should make delete button appear after a while', () => {
+    const { getByTestId, getByLabelText } = render(<App initialState={{ groceries: [] }} />)
+
+    submitGrocery('Gulrot', getByLabelText('Ny matvare..'))
+    longPress(getByTestId('grocery'))
 
     expect(getByLabelText('delete')).toBeVisible()
   })
@@ -97,16 +100,7 @@ describe('deleting groceries', () => {
     const { getByTestId, getByLabelText, queryByText } = render(<App initialState={{ groceries: [] }} />)
 
     submitGrocery('Gulrot', getByLabelText('Ny matvare..'))
-
-    const groceryElement = getByTestId('grocery')
-    fireEvent.mouseDown(groceryElement)
-
-    // act() is needed whenever code gets executed that causes state changes, probably only if
-    // we're not using testing-library functions, since those functions should know for themselfs
-    // when state changes might occur
-    act(() => {
-      jest.runAllTimers()
-    })
+    longPress(getByTestId('grocery'))
 
     fireEvent.click(getByLabelText('delete'))
 
