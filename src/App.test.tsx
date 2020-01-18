@@ -77,7 +77,7 @@ describe('sorting', () => {
 describe('deleting groceries', () => {
 
   function longPress(element: HTMLElement) {
-    fireEvent.mouseDown(element)
+    fireEvent.mouseDown(element.querySelector('input[type=checkbox]') || document)
 
     // act() is needed whenever code gets executed that causes state changes, probably only if
     // we're not using testing-library functions, since those functions should know for themselfs
@@ -87,7 +87,7 @@ describe('deleting groceries', () => {
     })
   }
 
-  test('long pressing a grocery should make delete button appear after a while', () => {
+  test('long pressing a grocery checkbox should make delete button appear after a while', () => {
     const { getByTestId, getByLabelText } = render(<App initialState={{ groceries: [] }} />)
 
     submitGrocery('Gulrot', getByLabelText('Ny matvare..'))

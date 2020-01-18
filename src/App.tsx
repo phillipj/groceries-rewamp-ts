@@ -157,9 +157,9 @@ const App: React.FC<{
       <main>
         <List>
           {groceries.map(grocery =>
-            <ListItem key={grocery.text} button onClick={() => dispatch({ type: 'toggle', text: grocery.text })} data-testid="grocery" {...groceryLongPressProps}>
+            <ListItem key={grocery.text} button onClick={() => dispatch({ type: 'toggle', text: grocery.text })} data-testid="grocery">
               <ListItemIcon>
-                <Checkbox checked={grocery.completed} color="primary" disableRipple />
+                <Checkbox checked={grocery.completed} color="primary" disableRipple  {...groceryLongPressProps} />
               </ListItemIcon>
               <ListItemText primary={grocery.text} />
 
