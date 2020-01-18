@@ -1,5 +1,5 @@
 import React from 'react'
-import { act, fireEvent, render } from '@testing-library/react'
+import { act, fireEvent, render, getByAltText } from '@testing-library/react'
 import App from './App'
 
 jest.useFakeTimers();
@@ -68,4 +68,46 @@ test('clicking a grocery to mark it as complete moves the grocery below all unco
 
   const groceries = getAllByTestId('grocery').map(grocery => grocery.textContent)
   expect(groceries).toEqual(['Gulrot', 'Brokkoli'])
+})
+
+
+
+describe('deleting groceries', () => {
+  test('long pressing a grocery should make delete button appear after a while', () => {
+    const { getByTestId, getByLabelText } = render(<App initialState={{ groceries: [] }} />)
+
+    submitGrocery('Gulrot', getByLabelText('Ny matvare..'))
+
+    const groceryElement = getByTestId('grocery')
+    fireEvent.mouseDown(groceryElement)
+
+    // act() is needed whenever code gets executed that causes state changes, probably only if
+    // we're not using testing-library functions, since those functions should know for themselfs
+    // when state changes might occur
+    act(() => {
+      jest.runAllTimers()
+    })
+
+    expect(getByLabelText('delete')).toBeVisible()
+  })
+
+  test('clicking the delete button removes the grocery from the list', () => {
+    const { getByTestId, getByLabelText, queryByText } = render(<App initialState={{ groceries: [] }} />)
+
+    submitGrocery('Gulrot', getByLabelText('Ny matvare..'))
+
+    const groceryElement = getByTestId('grocery')
+    fireEvent.mouseDown(groceryElement)
+
+    // act() is needed whenever code gets executed that causes state changes, probably only if
+    // we're not using testing-library functions, since those functions should know for themselfs
+    // when state changes might occur
+    act(() => {
+      jest.runAllTimers()
+    })
+
+    fireEvent.click(getByLabelText('delete'))
+
+    expect(queryByText('Gulrot')).not.toBeInTheDocument()
+  })
 })

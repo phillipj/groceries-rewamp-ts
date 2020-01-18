@@ -1,13 +1,18 @@
 import React, { useReducer, useEffect, useState } from 'react';
-
-import TextField from '@material-ui/core/TextField';
 import Autocomplete from '@material-ui/lab/Autocomplete';
+import {
+  Checkbox,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  ListItemSecondaryAction,
+  IconButton,
+  TextField
+} from '@material-ui/core';
+import DeleteIcon from '@material-ui/icons/Delete';
 
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
-import Checkbox from '@material-ui/core/Checkbox';
+import useLongPress from './use-long-press';
 
 type Grocery = {
   text: string;
@@ -21,6 +26,7 @@ type State = {
 type Action =
   | { type: 'toggle', text: string }
   | { type: 'add', text: string }
+  | { type: 'delete', grocery: Grocery }
   | { type: 'sort-completed-below-uncompleted' }
 
 const localStorageKey = 'groceries'
@@ -49,9 +55,17 @@ function storeStateToLocaleStorage(state: State) {
   }
 }
 
-const App: React.FC = () => {
+const App: React.FC<{
+  // Allowing state to be passed in for testing purposes, starting off from scratch..
+  // Or maybe a good idea anyways, letting index.ts pass in initial state loaded from `window.localStorage`?
+  initialState?: State
+}> = ({ initialState }) => {
   const [ fieldText, setFieldText ] = useState(() => '')
   const [ isAutoCompleteDropdownVisible, setAutoCompleteDropdownVisible ] = useState(() => false)
+
+  const [ showDeleteIcons, setShowDeleteIcons ] = useState(() => false)
+  const groceryLongPressProps = useLongPress(() => setShowDeleteIcons(!showDeleteIcons), 500)
+
   const [ state, dispatch ] = useReducer((state: State, action: Action) => {
     switch (action.type) {
       case 'add':
@@ -64,6 +78,12 @@ const App: React.FC = () => {
             ...otherGroceries,
           ]
         };
+
+      case 'delete':
+        return {
+          groceries: state.groceries.filter(grocery => grocery !== action.grocery)
+        };
+
       case 'toggle':
         const oldGrocery = state.groceries.find(grocery => grocery.text.toLowerCase() === action.text.toLowerCase())
         const oldCompletedStatus = oldGrocery?.isCompleted ?? false
@@ -92,7 +112,7 @@ const App: React.FC = () => {
       default:
         return state;
     }
-  }, getStateFromLocalStorage());
+  }, initialState ?? getStateFromLocalStorage());
 
   useEffect(() => {
     // This also gets called on initial render, which ideally we'd want to skip since we persist the just-loaded list
@@ -137,11 +157,19 @@ const App: React.FC = () => {
       <main>
         <List>
           {groceries.map(grocery =>
-            <ListItem key={grocery.text} button onClick={() => dispatch({ type: 'toggle', text: grocery.text })} data-testid="grocery">
+            <ListItem key={grocery.text} button onClick={() => dispatch({ type: 'toggle', text: grocery.text })} data-testid="grocery" {...groceryLongPressProps}>
               <ListItemIcon>
-                <Checkbox checked={grocery.isCompleted} disableRipple />
+                <Checkbox checked={grocery.isCompleted} color="primary" disableRipple />
               </ListItemIcon>
               <ListItemText primary={grocery.text} />
+
+              {showDeleteIcons &&
+                <ListItemSecondaryAction>
+                  <IconButton edge="end" aria-label="delete" onClick={() => dispatch({ type: 'delete', grocery })}>
+                    <DeleteIcon />
+                  </IconButton>
+                </ListItemSecondaryAction>
+              }
             </ListItem>
           )}
         </List>
