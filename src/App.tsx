@@ -16,7 +16,7 @@ import useLongPress from './use-long-press';
 
 type Grocery = {
   text: string;
-  isCompleted: boolean;
+  completed: boolean;
 }
 
 type State = {
@@ -74,7 +74,7 @@ const App: React.FC<{
 
         return {
           groceries: [
-            { text: toBeAdded, isCompleted: false },
+            { text: toBeAdded, completed: false },
             ...otherGroceries,
           ]
         };
@@ -86,7 +86,7 @@ const App: React.FC<{
 
       case 'toggle':
         const oldGrocery = state.groceries.find(grocery => grocery.text.toLowerCase() === action.text.toLowerCase())
-        const oldCompletedStatus = oldGrocery?.isCompleted ?? false
+        const oldCompletedStatus = oldGrocery?.completed ?? false
 
         setTimeout(() => {
           dispatch({ type: 'sort-completed-below-uncompleted' })
@@ -96,13 +96,13 @@ const App: React.FC<{
           groceries: state.groceries.map(grocery => {
             const isGroceryToToggle = grocery === oldGrocery
 
-            return isGroceryToToggle ? { ...grocery, isCompleted: !oldCompletedStatus } : grocery;
+            return isGroceryToToggle ? { ...grocery, completed: !oldCompletedStatus } : grocery;
           })
         }
 
       case 'sort-completed-below-uncompleted':
-        const uncompleted = state.groceries.filter(g => !g.isCompleted)
-        const completed = state.groceries.filter(g => g.isCompleted)
+        const uncompleted = state.groceries.filter(g => !g.completed)
+        const completed = state.groceries.filter(g => g.completed)
 
         return {
           ...state,
@@ -159,7 +159,7 @@ const App: React.FC<{
           {groceries.map(grocery =>
             <ListItem key={grocery.text} button onClick={() => dispatch({ type: 'toggle', text: grocery.text })} data-testid="grocery" {...groceryLongPressProps}>
               <ListItemIcon>
-                <Checkbox checked={grocery.isCompleted} color="primary" disableRipple />
+                <Checkbox checked={grocery.completed} color="primary" disableRipple />
               </ListItemIcon>
               <ListItemText primary={grocery.text} />
 
