@@ -1,6 +1,7 @@
 import React, { useReducer, useEffect, useState } from 'react';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import {
+  Button,
   Checkbox,
   List,
   ListItem,
@@ -8,11 +9,11 @@ import {
   ListItemText,
   ListItemSecondaryAction,
   IconButton,
-  TextField
+  TextField,
+  Container
 } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
-
-import useLongPress from './use-long-press';
+import CssBaseline from '@material-ui/core/CssBaseline';
 
 type Grocery = {
   text: string;
@@ -64,7 +65,6 @@ const App: React.FC<{
   const [ isAutoCompleteDropdownVisible, setAutoCompleteDropdownVisible ] = useState(() => false)
 
   const [ showDeleteIcons, setShowDeleteIcons ] = useState(() => false)
-  const groceryLongPressProps = useLongPress(() => setShowDeleteIcons(!showDeleteIcons), 500)
 
   const [ state, dispatch ] = useReducer((state: State, action: Action) => {
     switch (action.type) {
@@ -123,58 +123,67 @@ const App: React.FC<{
   const { groceries } = state;
 
   return (
-    <div style={{ padding: 20 }}>
-      <form onSubmit={(evt) => {
-        evt.preventDefault()
-        dispatch({ type: 'add', text: fieldText })
-        setFieldText('')
-        setAutoCompleteDropdownVisible(false)
-      }}>
-        <Autocomplete
-          options={groceries.map(grocery => grocery.text)}
-          open={isAutoCompleteDropdownVisible}
-          onOpen={() => groceries.length > 0 && setAutoCompleteDropdownVisible(true)}
-          onClose={() => setAutoCompleteDropdownVisible(false)}
-          onInputChange={(_evt, newValue) => {
-            const wasChangedProgrammatically = _evt == null
-            if (wasChangedProgrammatically) return
+    <Container style={{ marginTop: 20 }}>
+      <CssBaseline />
+      <div>
+        <header style={{ display: "flex", justifyItems: "flex-end", alignItems: "center" }}>
+          <form onSubmit={(evt) => {
+            evt.preventDefault()
+            dispatch({ type: 'add', text: fieldText })
+            setFieldText('')
+            setAutoCompleteDropdownVisible(false)
+          }} style={{ flexGrow: 1 }}>
+            <Autocomplete
+              options={groceries.map(grocery => grocery.text)}
+              open={isAutoCompleteDropdownVisible}
+              onOpen={() => groceries.length > 0 && setAutoCompleteDropdownVisible(true)}
+              onClose={() => setAutoCompleteDropdownVisible(false)}
+              onInputChange={(_evt, newValue) => {
+                const wasChangedProgrammatically = _evt == null
+                if (wasChangedProgrammatically) return
 
-            const wasOptionSelectedInDropdown = _evt.constructor.name !== 'SyntheticEvent'
-            if (wasOptionSelectedInDropdown) {
-              dispatch({ type: 'add', text: newValue })
-              setFieldText('')
-            } else {
-              setFieldText(newValue)
-            }
-          }}
-          style={{ minWidth: 300 }}
-          inputValue={fieldText}
-          renderInput={params => (
-            <TextField {...params} label="Ny matvare.." variant="outlined" fullWidth />
-          )}
-        />
-      </form>
-      <main>
-        <List>
-          {groceries.map(grocery =>
-            <ListItem key={grocery.text} button onClick={() => dispatch({ type: 'toggle', text: grocery.text })} data-testid="grocery">
-              <ListItemIcon>
-                <Checkbox checked={grocery.completed} color="primary" disableRipple  {...groceryLongPressProps} />
-              </ListItemIcon>
-              <ListItemText primary={grocery.text} />
+                const wasOptionSelectedInDropdown = _evt.constructor.name !== 'SyntheticEvent'
+                if (wasOptionSelectedInDropdown) {
+                  dispatch({ type: 'add', text: newValue })
+                  setFieldText('')
+                } else {
+                  setFieldText(newValue)
+                }
+              }}
+              style={{ minWidth: 300 }}
+              inputValue={fieldText}
+              renderInput={params => (
+                <TextField {...params} label="Ny matvare.." variant="outlined" fullWidth />
+              )}
+            />
+          </form>
 
-              {showDeleteIcons &&
-                <ListItemSecondaryAction>
-                  <IconButton edge="end" aria-label="delete" onClick={() => dispatch({ type: 'delete', grocery })}>
-                    <DeleteIcon />
-                  </IconButton>
-                </ListItemSecondaryAction>
-              }
-            </ListItem>
-          )}
-        </List>
-      </main>
-    </div>
+          <Button onClick={() => setShowDeleteIcons(!showDeleteIcons)} style={{ paddingLeft: 10 }}>
+            {showDeleteIcons ? "Done" : "Edit"}
+          </Button>
+        </header>
+        <main>
+          <List>
+            {groceries.map(grocery =>
+              <ListItem key={grocery.text} button onClick={() => dispatch({ type: 'toggle', text: grocery.text })} data-testid="grocery">
+                <ListItemIcon>
+                  <Checkbox checked={grocery.completed} color="primary" disableRipple  />
+                </ListItemIcon>
+                <ListItemText primary={grocery.text} />
+
+                {showDeleteIcons &&
+                  <ListItemSecondaryAction>
+                    <IconButton edge="end" aria-label="delete" onClick={() => dispatch({ type: 'delete', grocery })}>
+                      <DeleteIcon />
+                    </IconButton>
+                  </ListItemSecondaryAction>
+                }
+              </ListItem>
+            )}
+          </List>
+        </main>
+      </div>
+    </Container>
   );
 }
 
