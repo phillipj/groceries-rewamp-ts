@@ -127,28 +127,26 @@ const App: React.FC<{
       <CssBaseline />
       <div>
         <header style={{ display: "flex", justifyItems: "flex-end", alignItems: "center" }}>
-          <form onSubmit={(evt) => {
-            evt.preventDefault()
-            dispatch({ type: 'add', text: fieldText })
-            setFieldText('')
-            setAutoCompleteDropdownVisible(false)
-          }} style={{ flexGrow: 1 }}>
+          <form onSubmit={(evt) => evt.preventDefault()} style={{ flexGrow: 1 }}>
             <Autocomplete
+              freeSolo
               options={groceries.map(grocery => grocery.text)}
               open={isAutoCompleteDropdownVisible}
               onOpen={() => groceries.length > 0 && setAutoCompleteDropdownVisible(true)}
               onClose={() => setAutoCompleteDropdownVisible(false)}
-              onInputChange={(_evt, newValue) => {
-                const wasChangedProgrammatically = _evt == null
-                if (wasChangedProgrammatically) return
-
-                const wasOptionSelectedInDropdown = _evt.constructor.name !== 'SyntheticEvent'
-                if (wasOptionSelectedInDropdown) {
-                  dispatch({ type: 'add', text: newValue })
-                  setFieldText('')
-                } else {
-                  setFieldText(newValue)
+              blurOnSelect={true}
+              onInputChange={(_evt, value, reason) => {
+                if (reason === 'input') {
+                  setFieldText(value)
                 }
+              }}
+              onChange={(_evt, value) => {
+                if (!Boolean(value)) return
+
+                dispatch({ type: 'add', text: value })
+
+                setAutoCompleteDropdownVisible(false)
+                setFieldText('')
               }}
               style={{ minWidth: 300 }}
               inputValue={fieldText}
