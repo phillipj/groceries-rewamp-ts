@@ -134,7 +134,6 @@ const App: React.FC<{
               open={isAutoCompleteDropdownVisible}
               onOpen={() => groceries.length > 0 && setAutoCompleteDropdownVisible(true)}
               onClose={() => setAutoCompleteDropdownVisible(false)}
-              blurOnSelect={true}
               onInputChange={(_evt, value, reason) => {
                 if (reason === 'input') {
                   setFieldText(value)
