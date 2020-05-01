@@ -1,5 +1,5 @@
 import React, { useReducer, useEffect, useState } from 'react';
-import Autocomplete from '@material-ui/lab/Autocomplete';
+import Select from 'react-select/creatable';
 import {
   Button,
   Checkbox,
@@ -9,7 +9,6 @@ import {
   ListItemText,
   ListItemSecondaryAction,
   IconButton,
-  TextField,
   Container
 } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -61,9 +60,6 @@ const App: React.FC<{
   // Or maybe a good idea anyways, letting index.ts pass in initial state loaded from `window.localStorage`?
   initialState?: State
 }> = ({ initialState }) => {
-  const [ fieldText, setFieldText ] = useState(() => '')
-  const [ isAutoCompleteDropdownVisible, setAutoCompleteDropdownVisible ] = useState(() => false)
-
   const [ showDeleteIcons, setShowDeleteIcons ] = useState(() => false)
 
   const [ state, dispatch ] = useReducer((state: State, action: Action) => {
@@ -128,30 +124,27 @@ const App: React.FC<{
       <div>
         <header style={{ display: "flex", justifyItems: "flex-end", alignItems: "center" }}>
           <form onSubmit={(evt) => evt.preventDefault()} style={{ flexGrow: 1 }}>
-            <Autocomplete
-              freeSolo
-              options={groceries.map(grocery => grocery.text)}
-              open={isAutoCompleteDropdownVisible}
-              onOpen={() => groceries.length > 0 && setAutoCompleteDropdownVisible(true)}
-              onClose={() => setAutoCompleteDropdownVisible(false)}
-              onInputChange={(_evt, value, reason) => {
-                if (reason === 'input') {
-                  setFieldText(value)
-                }
-              }}
-              onChange={(_evt, value) => {
-                if (!Boolean(value)) return
+            <Select
+              options={groceries.map(({text}) => ({
+                value: text, label: text
+              }))}
+              onChange={(option) => {
+                if (option == null) return
 
-                dispatch({ type: 'add', text: value })
-
-                setAutoCompleteDropdownVisible(false)
-                setFieldText('')
+                // something fishy with the TypeScript defs enforces a check to ensure the `.value` field is indeed present before using it
+                "value" in option && dispatch({ type: 'add', text: option.value })
               }}
-              style={{ minWidth: 300 }}
-              inputValue={fieldText}
-              renderInput={params => (
-                <TextField {...params} label="Ny matvare.." variant="outlined" fullWidth />
-              )}
+              styles={{
+                container: (provided) => ({
+                  ...provided,
+                  fontSize: '1rem'
+                })
+              }}
+              placeholder="Ny matvare.."
+              formatCreateLabel={(value) => `Legg til "${value}"`}
+              value={null}
+              isSearchable
+              isClearable
             />
           </form>
 
