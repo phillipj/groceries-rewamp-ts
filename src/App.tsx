@@ -143,6 +143,7 @@ const App: React.FC<{
               placeholder="Ny matvare.."
               formatCreateLabel={(value) => `Legg til "${value}"`}
               value={null}
+              blurInputOnSelect={false}
               isSearchable
               isClearable
             />
